@@ -9,12 +9,16 @@ class AuditingSummary(SQLModel, table=True):
 def load_to_sql(csv_file="aggregated.csv", db_url="sqlite:///auditing.db"):
     df = pd.read_csv(csv_file)
 
+    # Renomeia a primeira coluna para "fraud_type"
+    first_col = df.columns[0]
+    df = df.rename(columns={first_col: "fraud_type"})
+
     engine = create_engine(db_url)
     SQLModel.metadata.create_all(engine)
 
     with Session(engine) as session:
         for _, row in df.iterrows():
-            record = AuditingSummary(fraud_type=row["transaction_id"], count=row["count"])
+            record = AuditingSummary(fraud_type=row["fraud_type"], count=row["count"])
             session.add(record)
         session.commit()
     print("Registros inseridos em auditing_summary.")
