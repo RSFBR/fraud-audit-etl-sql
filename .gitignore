@@ -2,3 +2,4 @@ venv
 auditing_summary.db
 raw_data.parquet
 aggregated.csv
+__pycache__
