@@ -14,7 +14,7 @@ def load_to_sql(csv_file="aggregated.csv", db_url="sqlite:///auditing.db"):
 
     with Session(engine) as session:
         for _, row in df.iterrows():
-            record = AuditingSummary(fraud_type=row["log_id"], count=row["count"])
+            record = AuditingSummary(fraud_type=row["transaction_id"], count=row["count"])
             session.add(record)
         session.commit()
     print("Registros inseridos em auditing_summary.")
