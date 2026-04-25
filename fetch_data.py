@@ -16,7 +16,6 @@ def fetch_data(project_id, endpoint, token, output_file="raw_data.parquet"):
 
     # Verifica se o parquet tem linhas
     df = pd.read_parquet(output_file)
-    df.to_csv("raw_data.csv", index=False, encoding="utf-8")  # Salva como CSV para inspeção
     if df.empty:
         raise ValueError("O parquet está vazio!")
     print(f"O parquet contém {len(df)} linhas.")
