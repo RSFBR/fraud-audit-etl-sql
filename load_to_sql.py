@@ -27,7 +27,7 @@
 #     print("Registros inseridos em auditing_summary.")
 
 import pandas as pd
-from sqlmodel import SQLModel, create_engine, Session, Field
+from sqlmodel import SQLModel, create_engine, Session, Field, select
 
 # Define a tabela de auditoria
 class AuditingSummary(SQLModel, table=True):
@@ -59,7 +59,10 @@ def load_to_sql(csv_file="interim/aggregated.csv", db_url="sqlite:///auditing.db
         session.commit()
 
         # Confirma inserção
-        results = session.query(AuditingSummary).all()
+        results = session.exec(select(AuditingSummary)).all()
         print(f"Foram inseridos {len(results)} registros.")
-        if results:
+
+        if not results:
+            RuntimeError("Nenhum registro carregado em auditing_summary")
+        else:
             print("Exemplo de linha inserida:", results[0])
