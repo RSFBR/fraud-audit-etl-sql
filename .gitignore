@@ -4,3 +4,4 @@ auditing_summary.db
 raw_data.parquet
 __pycache__
 interim
+raw_data.csv
