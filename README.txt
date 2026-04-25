@@ -35,3 +35,5 @@ Pipeline de auditoria de transações suspeitas.
     Insere registros do aggregated.csv.
 
     Valida que pelo menos uma linha foi inserida.
+
+    falha caso não haja registros, como parte da validação final.

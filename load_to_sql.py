@@ -60,9 +60,9 @@ def load_to_sql(csv_file="interim/aggregated.csv", db_url="sqlite:///auditing.db
 
         # Confirma inserção
         results = session.exec(select(AuditingSummary)).all()
-        print(f"Foram inseridos {len(results)} registros.")
 
         if not results:
-            RuntimeError("Nenhum registro carregado em auditing_summary")
+            raise RuntimeError("Nenhum registro carregado em auditing_summary")
         else:
+            print(f"Foram inseridos {len(results)} registros.")
             print("Exemplo de linha inserida:", results[0])
