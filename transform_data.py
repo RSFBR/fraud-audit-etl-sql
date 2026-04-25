@@ -6,13 +6,6 @@ def transform_data(input_file="raw_data.parquet", output_file="interim/aggregate
     print(df.head())
     print(df.columns)
 
-    # # Exemplo de agregação simples
-    # index = df["transaction_id"] # Assume que a primeira coluna é a categoria para agregação
-    # summary = df.groupby(index).size().reset_index(name="count")
-
-    # summary.to_csv(output_file, index=False)
-    # print(f"Arquivo {output_file} gerado com {len(summary)} registros.")
-
     # Critério 1: valor alto em canal externo (já existente)
     high_value_external = (df["amount"] > 10000) & (df["transaction_type"] == "external")
 
@@ -26,17 +19,28 @@ def transform_data(input_file="raw_data.parquet", output_file="interim/aggregate
     ip_counts = df["device_ip"].map(df["device_ip"].value_counts())
     suspicious_ip = ip_counts > 50
 
-    # Combina critérios
+    # Critério 5: flag já fornecida pelo dataset
+    dataset_flag = df["is_fraud_suspect"].astype(bool)
+
+    # Combina todos os critérios
     df["fraud_flag"] = (
-        high_value_external | same_account | foreign_high | suspicious_ip
+        high_value_external | same_account | foreign_high | suspicious_ip | dataset_flag
     ).astype(int)
 
-    grouped = (
-        df.groupby("account_origin")
-          .agg({"fraud_flag": "sum", "amount": "sum"})
-          .rename(columns={"fraud_flag": "suspect_count", "amount": "total_amount"})
-          .reset_index()
-    )
+    print(df["fraud_flag"].value_counts())  # Verifica quantos suspeitos foram identificados
+
+    # Conta transações suspeitas por cliente
+    suspect_count = df.groupby("account_origin")["fraud_flag"].sum()
+
+    # Soma apenas valores suspeitos (amount * fraud_flag)
+    suspicious_amount = (df["amount"] * df["fraud_flag"]).groupby(df["account_origin"]).sum()
+
+    # Monta DataFrame final
+    grouped = pd.DataFrame({
+        "account_origin": suspect_count.index,
+        "suspect_count": suspect_count.values,
+        "total_amount": suspicious_amount.values
+    })
 
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     grouped.to_csv(output_file, index=False)
