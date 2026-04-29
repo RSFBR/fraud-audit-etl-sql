@@ -1,39 +1,28 @@
-# Fraud Audit ETL
+# Pipeline de Auditoria
 
-Pipeline de auditoria de transações suspeitas.
+## Pré-requisitos
+- Python 3.10+
+- Instalar dependências: pip install -r requirements.txt
+- Configurar variáveis no arquivo `.env.template`:
+  - PROJECT_ID
+  - DATASET_ENDPOINT (com placeholder {PROJECT_ID})
+  - TOKEN
 
 ## Execução em sequência
-
-1. **Carregar variáveis de ambiente**
-   - Copie `.env.template` para `.env` e configure os valores necessários (token, endpoint, etc.).
-
-2. **Buscar dados da API**
-   ```bash
+1. Buscar dados da API:
    python fetch_data.py
 
-    Faz chamada GET na API de datasets.
+   Esse script:
+   - Faz chamada GET na API de datasets
+   - Salva parquet em raw_data.parquet
+   - Executa transform_data()
+   - Gera aggregated.csv
+   - Executa load_to_sql() para carregar no banco
 
-    Salva raw_data.parquet e raw_data.csv.
+2. Executar etapas isoladas (opcional):
+   - Transformação: python transform_data.py
+   - Carga: python load_to_sql.py
 
-3. **Transformar dados**
-   ```bash
-    python transform_data.py
-
-    Lê raw_data.parquet com pandas.read_parquet.
-
-    Aplica critérios de fraude.
-
-    Gera interim/aggregated.csv.
-
-4. **Carregar no banco**
-
-   ```bash
-    python load_to_sql.py
-
-    Cria tabela auditing_summary em auditing.db.
-    
-    Insere registros do aggregated.csv.
-
-    Valida que pelo menos uma linha foi inserida.
-
-    falha caso não haja registros, como parte da validação final.
+## Resultado
+- Arquivo `aggregated.csv` gerado em `interim/`
+- Banco SQLite `auditing.db` com tabela `auditing_summary` populada

@@ -21,19 +21,22 @@ def fetch_data(project_id, endpoint, token, output_file="raw_data.parquet"):
     print(f"O parquet contém {len(df)} linhas.")
 
 if __name__ == "__main__":
-    # Exemplo de uso
     import os
     from dotenv import load_dotenv
-    # Carrega variáveis do arquivo .env
     load_dotenv(".env.template")
 
     project_id = os.getenv("PROJECT_ID")
     endpoint = os.getenv("DATASET_ENDPOINT")
+    endpoint = endpoint.replace("{PROJECT_ID}", project_id)
     token = os.getenv("TOKEN")
     if not all([project_id, endpoint, token]):
         raise ValueError("Faltam variáveis no .env.template: PROJECT_ID, DATASET_ENDPOINT ou TOKEN")
 
-    endpoint = endpoint.replace("{PROJECT_ID}", project_id)
     fetch_data(project_id, endpoint, token)
+    print("Fetch concluído.")
+
     transform_data()
+    print("Transformação concluída.")
+
     load_to_sql()
+    print("Carga concluída.")
